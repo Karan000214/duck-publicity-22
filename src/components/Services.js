@@ -2,66 +2,26 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Target, Search, Smartphone, Palette, Globe } from 'lucide-react';
 import { FiArrowRight } from 'react-icons/fi';
+import { useContent } from '../context/ContentContext';
+
+const iconMap = {
+  Zap,
+  Target,
+  Search,
+  Smartphone,
+  Palette,
+  Globe,
+};
 
 const Services = () => {
-  const services = [
-    {
-      icon: Zap,
-      title: 'Performance Marketing',
-      description: 'Data-driven campaigns that focus on measurable results and ROI optimization.',
-      results: '320% avg ROI',
-      color: 'from-orange to-red-500',
-    },
-    {
-      icon: Target,
-      title: 'Meta Ads',
-      description: 'Strategic Facebook & Instagram campaigns designed for conversion and scale.',
-      results: '4.8% avg conversion',
-      color: 'from-blue-600 to-blue-400',
-    },
-    {
-      icon: Search,
-      title: 'Google Ads',
-      description: 'High-intent keyword targeting to capture customers ready to buy.',
-      results: '8.5% avg CTR',
-      color: 'from-yellow-400 to-orange-400',
-    },
-    {
-      icon: Smartphone,
-      title: 'Social Media Marketing',
-      description: 'Content strategy, community management, and organic growth campaigns.',
-      results: '250% engagement growth',
-      color: 'from-pink-500 to-rose-500',
-    },
-    {
-      icon: Search,
-      title: 'SEO Optimization',
-      description: 'Technical and content SEO to dominate search results and drive organic traffic.',
-      results: '180% organic traffic',
-      color: 'from-green-500 to-emerald-500',
-    },
-    {
-      icon: Palette,
-      title: 'Branding & Creative',
-      description: 'Premium brand strategy and creative design that converts and resonates.',
-      results: '95% brand recall',
-      color: 'from-purple-600 to-indigo-600',
-    },
-    {
-      icon: Globe,
-      title: 'Website Development',
-      description: 'High-converting, responsive websites built for performance and user experience.',
-      results: '6.2% avg conversion',
-      color: 'from-teal-500 to-cyan-500',
-    },
-    {
-      icon: Target,
-      title: 'Lead Generation',
-      description: 'Strategic campaigns designed to generate high-quality leads for your business.',
-      results: '$8 cost per lead',
-      color: 'from-orange to-yellow-500',
-    },
-  ];
+  const { content } = useContent();
+  const rawServices = content?.services || [];
+
+  const services = rawServices.map((s) => ({
+    ...s,
+    icon: iconMap[s.iconName] || Zap,
+    color: s.color || 'from-orange to-red-500',
+  }));
 
   const containerVariants = {
     hidden: { opacity: 0 },

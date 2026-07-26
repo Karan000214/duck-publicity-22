@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import DuckLogo from './DuckLogo';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Linkedin, Twitter, Facebook, Instagram } from 'lucide-react';
@@ -21,22 +22,22 @@ const Footer = () => {
       { label: 'SEO Optimization', href: '#services' },
     ],
     Company: [
-      { label: 'About Us', href: '#hero' },
-      { label: 'Our Process', href: '#process' },
-      { label: 'Case Studies', href: '#case-studies' },
-      { label: 'Contact', href: '#cta' },
+      { label: 'About Us', href: '/about' },
+      { label: 'Our Process', href: '/process' },
+      { label: 'Insights', href: '/insights' },
+      { label: 'Contact', href: '/contact' },
     ],
     Resources: [
-      { label: 'Blog', href: '#' },
-      { label: 'Guides', href: '#' },
-      { label: 'Pricing', href: '#' },
-      { label: 'FAQ', href: '#' },
+      { label: 'Blog', href: '/blog' },
+      { label: 'Guides', href: '/guides' },
+      { label: 'Pricing', href: '/pricing' },
+      { label: 'FAQ', href: '/faq' },
     ],
     Legal: [
-      { label: 'Privacy Policy', href: '#' },
-      { label: 'Terms of Service', href: '#' },
-      { label: 'Cookie Policy', href: '#' },
-      { label: 'Disclaimer', href: '#' },
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Terms of Service', href: '/terms-of-service' },
+      { label: 'Cookie Policy', href: '/cookie-policy' },
+      { label: 'Disclaimer', href: '/disclaimer' },
     ],
   };
 
@@ -120,12 +121,21 @@ const Footer = () => {
                     whileHover={{ x: 4 }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
-                    <button
-                      onClick={() => scrollToSection(link.href)}
-                      className="text-gray-400 hover:text-teal transition-colors duration-300 text-sm"
-                    >
-                      {link.label}
-                    </button>
+                    {link.href.startsWith('/') ? (
+                      <Link
+                        to={link.href}
+                        className="text-gray-400 hover:text-teal transition-colors duration-300 text-sm"
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => scrollToSection(link.href)}
+                        className="text-gray-400 hover:text-teal transition-colors duration-300 text-sm"
+                      >
+                        {link.label}
+                      </button>
+                    )}
                   </motion.li>
                 ))}
               </ul>

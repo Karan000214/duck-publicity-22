@@ -27,6 +27,24 @@ const CTA = () => {
     e.preventDefault();
     setLoading(true);
 
+    try {
+      // 1. Submit lead to database API
+      await fetch('/api/submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          service: formData.service || 'General Marketing Inquiry',
+          message: `Budget: ${formData.budget || 'N/A'}. Free Marketing Audit requested.`,
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to store submission in DB:', err);
+    }
+
     const subject = `New Lead Inquiry - ${formData.company || 'Duck Publicity'}`;
     const body = [
       `Name: ${formData.name}`,

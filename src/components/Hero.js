@@ -2,8 +2,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import AnimatedCounter from './AnimatedCounter';
+import { useContent } from '../context/ContentContext';
 
 const Hero = () => {
+  const { content } = useContent();
+  const heroData = content?.hero || {};
+
   const scrollToSection = (href) => {
     const element = document.querySelector(href);
     if (element) {
@@ -31,7 +35,7 @@ const Hero = () => {
     },
   };
 
-  const metrics = [
+  const metrics = heroData.metrics || [
     { label: 'ROAS', value: '120%', prefix: '+' },
     { label: 'Leads Generated', value: '200+', prefix: '' },
     { label: 'Revenue Growth', value: '60%', prefix: '+' },
@@ -69,7 +73,7 @@ const Hero = () => {
               variants={itemVariants}
             >
               <span className="w-2 h-2 bg-teal rounded-full animate-pulse"></span>
-              <span className="text-teal font-semibold text-sm">Your Vision - Our Strategy - Real Growth</span>
+              <span className="text-teal font-semibold text-sm">{heroData.tagline || 'Your Vision - Our Strategy - Real Growth'}</span>
             </motion.div>
 
             {/* Main Headline */}
@@ -77,8 +81,7 @@ const Hero = () => {
               className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-navy font-display"
               variants={itemVariants}
             >
-              We Turn Marketing Into{' '}
-              <span className="gradient-text">Measurable Growth</span>
+              {heroData.mainHeadline || 'We Turn Marketing Into Measurable Growth'}
             </motion.h1>
 
             {/* Subheadline */}
@@ -86,7 +89,7 @@ const Hero = () => {
               className="text-lg md:text-xl text-gray-600 leading-relaxed"
               variants={itemVariants}
             >
-              Duck Publicity helps brands scale using performance-driven digital marketing strategies. We don't do vanity metrics – we deliver real ROI.
+              {heroData.subheadline || "Duck Publicity helps brands scale using performance-driven digital marketing strategies. We don't do vanity metrics – we deliver real ROI."}
             </motion.p>
 
             {/* CTA Buttons */}

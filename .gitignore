@@ -16,3 +16,4 @@ build/
 dist/
 .next/
 out/
+.vercel
