@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -345,86 +345,155 @@ export const FAQPage = () => (
   </PageLayout>
 );
 
+export const DynamicLegalPage = ({ docType, eyebrow, title, description, fallbackContent }) => {
+  const [htmlContent, setHtmlContent] = useState('');
+  const [filename, setFilename] = useState('');
+  const [lastModified, setLastModified] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    fetch(`/api/legal/${docType}`)
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error('Failed to load document');
+      })
+      .then((data) => {
+        if (isMounted && data.html) {
+          setHtmlContent(data.html);
+          setFilename(data.filename);
+          if (data.lastModified) {
+            const dateStr = new Date(data.lastModified).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            });
+            setLastModified(dateStr);
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('Using fallback legal content for', docType, err);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [docType]);
+
+  return (
+    <PageLayout
+      eyebrow={eyebrow}
+      title={title}
+      description={description}
+      ctaPrimary="Contact Us"
+      ctaSecondary="Book Call"
+      ctaPrimaryHref="/contact"
+      ctaSecondaryHref="/contact"
+    >
+      <div className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.35)] text-slate-700 leading-relaxed md:p-10">
+        {filename && (
+          <div className="mb-6 pb-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 font-medium">
+            <span className="inline-flex items-center gap-1.5 bg-teal/10 text-teal px-3.5 py-1.5 rounded-full font-semibold">
+              📄 Synced from Word Document: {filename}
+            </span>
+            {lastModified && <span>Last Saved: {lastModified}</span>}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="py-12 text-center text-slate-400 font-medium animate-pulse">
+            Loading document content from Word file...
+          </div>
+        ) : htmlContent ? (
+          <div
+            className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-navy prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:mb-4 prose-p:leading-relaxed prose-li:mb-2 prose-strong:text-slate-900"
+            dangerouslySetInnerHTML={{ __html: htmlContent }}
+          />
+        ) : (
+          <div className="space-y-6 text-slate-600 leading-7">{fallbackContent}</div>
+        )}
+      </div>
+    </PageLayout>
+  );
+};
+
 export const PrivacyPage = () => (
-  <PageLayout
+  <DynamicLegalPage
+    docType="privacy-policy"
     eyebrow="Privacy Policy"
     title="Privacy Policy"
-    description="This policy explains how Duck Publicity collects, uses, and protects information when you use our website or contact us."
-    ctaPrimary="Contact Us"
-    ctaSecondary="Read Terms"
-    ctaPrimaryHref="/contact"
-    ctaSecondaryHref="/terms-of-service"
-  >
-    <div className="space-y-6 rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.35)] text-slate-600 leading-7 md:p-10">
-      <p>Information Collection: We may collect your name, email, phone number, business details, and usage data when you contact us or interact with the website.</p>
-      <p>How Data Is Used: We use this information to respond to enquiries, improve our services, and provide relevant marketing support.</p>
-      <p>Cookies: We may use cookies and analytics tools to understand how visitors navigate the site and improve the user experience.</p>
-      <p>Third-Party Services: We may use trusted third-party platforms for analytics, communications, or site performance.</p>
-      <p>Data Security: We take reasonable steps to protect your personal information, though no online method is completely risk-free.</p>
-      <p>User Rights: You may request access to, correction of, or deletion of your personal information where applicable.</p>
-      <p>Contact Information: For privacy-related questions, please email hello@duckpublicity.com.</p>
-    </div>
-  </PageLayout>
+    description="This policy explains how Duck Publicity collects, uses, and protects information. Live-synced directly from our official Word document."
+    fallbackContent={
+      <>
+        <p>Information Collection: We may collect your name, email, phone number, business details, and usage data when you contact us or interact with the website.</p>
+        <p>How Data Is Used: We use this information to respond to enquiries, improve our services, and provide relevant marketing support.</p>
+        <p>Cookies: We may use cookies and analytics tools to understand how visitors navigate the site and improve the user experience.</p>
+        <p>Third-Party Services: We may use trusted third-party platforms for analytics, communications, or site performance.</p>
+        <p>Data Security: We take reasonable steps to protect your personal information, though no online method is completely risk-free.</p>
+        <p>User Rights: You may request access to, correction of, or deletion of your personal information where applicable.</p>
+        <p>Contact Information: For privacy-related questions, please email hello@duckpublicity.com.</p>
+      </>
+    }
+  />
 );
 
 export const TermsPage = () => (
-  <PageLayout
+  <DynamicLegalPage
+    docType="terms-of-service"
     eyebrow="Terms of Service"
     title="Terms of Service"
-    description="These terms outline how our services and website are used, and what clients and visitors can expect from Duck Publicity."
-    ctaPrimary="Contact Us"
-    ctaSecondary="Privacy Policy"
-    ctaPrimaryHref="/contact"
-    ctaSecondaryHref="/privacy-policy"
-  >
-    <div className="space-y-6 rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.35)] text-slate-600 leading-7 md:p-10">
-      <p>Acceptance of Terms: By using this website or our services, you agree to these terms and conditions.</p>
-      <p>Services Provided: We provide marketing strategy, digital marketing support, and related advisory services based on the scope agreed in each engagement.</p>
-      <p>Payments: Any fees, timelines, and payment terms are discussed and agreed to before work begins.</p>
-      <p>Client Responsibilities: Clients are responsible for timely approvals, clear business information, and access to necessary assets.</p>
-      <p>Intellectual Property: Content and materials created for clients remain subject to agreed ownership and usage terms.</p>
-      <p>Limitation of Liability: Duck Publicity is not liable for indirect, consequential, or special damages arising from the use of our services.</p>
-      <p>Termination: Either party may terminate engagements in line with the written agreement or reasonable notice.</p>
-      <p>Changes to Terms: We may update these terms from time to time, and the latest version will apply.</p>
-    </div>
-  </PageLayout>
+    description="These terms outline how our services and website are used. Live-synced directly from our official Word document."
+    fallbackContent={
+      <>
+        <p>Acceptance of Terms: By using this website or our services, you agree to these terms and conditions.</p>
+        <p>Services Provided: We provide marketing strategy, digital marketing support, and related advisory services based on the scope agreed in each engagement.</p>
+        <p>Payments: Any fees, timelines, and payment terms are discussed and agreed to before work begins.</p>
+        <p>Client Responsibilities: Clients are responsible for timely approvals, clear business information, and access to necessary assets.</p>
+        <p>Intellectual Property: Content and materials created for clients remain subject to agreed ownership and usage terms.</p>
+        <p>Limitation of Liability: Duck Publicity is not liable for indirect, consequential, or special damages arising from the use of our services.</p>
+        <p>Termination: Either party may terminate engagements in line with the written agreement or reasonable notice.</p>
+        <p>Changes to Terms: We may update these terms from time to time, and the latest version will apply.</p>
+      </>
+    }
+  />
 );
 
 export const CookiePage = () => (
-  <PageLayout
+  <DynamicLegalPage
+    docType="cookie-policy"
     eyebrow="Cookie Policy"
     title="Cookie Policy"
-    description="This page explains what cookies are, how we use them, and how you can manage cookie settings on our website."
-    ctaPrimary="Contact Us"
-    ctaSecondary="Privacy Policy"
-    ctaPrimaryHref="/contact"
-    ctaSecondaryHref="/privacy-policy"
-  >
-    <div className="space-y-6 rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.35)] text-slate-600 leading-7 md:p-10">
-      <p>What Cookies Are: Cookies are small files stored on your device to improve website functionality and collect analytics data.</p>
-      <p>Types of Cookies Used: We may use essential cookies for basic site function, analytics cookies to understand usage, and preference cookies where relevant.</p>
-      <p>Analytics Cookies: These help us understand traffic, user behavior, and performance to improve the site.</p>
-      <p>How Users Can Manage Cookies: You can usually control or disable cookies through your browser settings.</p>
-      <p>Third-Party Cookies: Some analytics or embedded tools may place cookies on your device, subject to their own terms.</p>
-    </div>
-  </PageLayout>
+    description="This page explains what cookies are, how we use them, and how you can manage cookie settings. Live-synced directly from our official Word document."
+    fallbackContent={
+      <>
+        <p>What Cookies Are: Cookies are small files stored on your device to improve website functionality and collect analytics data.</p>
+        <p>Types of Cookies Used: We may use essential cookies for basic site function, analytics cookies to understand usage, and preference cookies where relevant.</p>
+        <p>Analytics Cookies: These help us understand traffic, user behavior, and performance to improve the site.</p>
+        <p>How Users Can Manage Cookies: You can usually control or disable cookies through your browser settings.</p>
+        <p>Third-Party Cookies: Some analytics or embedded tools may place cookies on your device, subject to their own terms.</p>
+      </>
+    }
+  />
 );
 
 export const DisclaimerPage = () => (
-  <PageLayout
+  <DynamicLegalPage
+    docType="disclaimer"
     eyebrow="Disclaimer"
     title="Disclaimer"
-    description="The information on this website is provided for general informational purposes and should not be seen as guaranteed results."
-    ctaPrimary="Contact Us"
-    ctaSecondary="Our Process"
-    ctaPrimaryHref="/contact"
-    ctaSecondaryHref="/process"
-  >
-    <div className="space-y-6 rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.35)] text-slate-600 leading-7 md:p-10">
-      <p>Information provided on this website is for general informational purposes only.</p>
-      <p>Results may vary depending on industry, competition, budget, implementation, and business context.</p>
-      <p>Duck Publicity does not guarantee specific rankings, lead volume, revenue outcomes, or other business performance results.</p>
-      <p>All content and recommendations are provided in good faith and should be reviewed within the context of your own business and strategy.</p>
-    </div>
-  </PageLayout>
+    description="The information on this website is provided for general informational purposes. Live-synced directly from our official Word document."
+    fallbackContent={
+      <>
+        <p>Information provided on this website is for general informational purposes only.</p>
+        <p>Results may vary depending on industry, competition, budget, implementation, and business context.</p>
+        <p>Duck Publicity does not guarantee specific rankings, lead volume, revenue outcomes, or other business performance results.</p>
+        <p>All content and recommendations are provided in good faith and should be reviewed within the context of your own business and strategy.</p>
+      </>
+    }
+  />
 );

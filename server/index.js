@@ -142,7 +142,98 @@ app.put('/api/content', authenticateToken, async (req, res) => {
   }
 });
 
-// ==================== FORM SUBMISSIONS ROUTES ====================
+const fs = require('fs');
+const path = require('path');
+const mammoth = require('mammoth');
+
+// ==================== LEGAL DOCUMENTS (.DOCX) ROUTES ====================
+
+const legalDocMapping = {
+  'privacy-policy': ['Duck Publicity Privacy Policy.docx', 'Privacy Policy.docx', 'privacy.docx'],
+  'terms-of-service': ['Duck Publicity Terms of Service.docx', 'Terms of Service.docx', 'terms.docx'],
+  'cookie-policy': ['Cookie Policy – Duck Publicity.docx', 'Cookie Policy - Duck Publicity.docx', 'Cookie Policy.docx', 'cookie.docx'],
+  'disclaimer': ['Disclaimer.docx', 'disclaimer.docx']
+};
+
+function findLegalDocFile(docType) {
+  const possibleNames = legalDocMapping[docType] || [];
+  const projectRoot = path.join(__dirname, '..');
+  const legalDocsDir = path.join(projectRoot, 'legal_docs');
+
+  // Search project root & legal_docs directory
+  for (const name of possibleNames) {
+    const rootPath = path.join(projectRoot, name);
+    if (fs.existsSync(rootPath)) return rootPath;
+
+    const dirPath = path.join(legalDocsDir, name);
+    if (fs.existsSync(dirPath)) return dirPath;
+  }
+
+  // Fallback regex matching
+  try {
+    const rootFiles = fs.readdirSync(projectRoot);
+    const match = rootFiles.find((f) => {
+      if (!f.endsWith('.docx')) return false;
+      const lower = f.toLowerCase();
+      if (docType === 'privacy-policy' && lower.includes('privacy')) return true;
+      if (docType === 'terms-of-service' && lower.includes('terms')) return true;
+      if (docType === 'cookie-policy' && lower.includes('cookie')) return true;
+      if (docType === 'disclaimer' && lower.includes('disclaimer')) return true;
+      return false;
+    });
+
+    if (match) return path.join(projectRoot, match);
+  } catch (e) {
+    console.error('Error finding legal doc:', e);
+  }
+
+  return null;
+}
+
+// Get single legal doc HTML parsed live from .docx file
+app.get('/api/legal/:docType', async (req, res) => {
+  try {
+    const { docType } = req.params;
+    const filePath = findLegalDocFile(docType);
+
+    if (!filePath) {
+      return res.status(404).json({ error: `Word document file for ${docType} not found.` });
+    }
+
+    const stats = fs.statSync(filePath);
+    const result = await mammoth.convertToHtml({ path: filePath });
+
+    res.json({
+      docType,
+      filename: path.basename(filePath),
+      lastModified: stats.mtime.toISOString(),
+      html: result.value || ''
+    });
+  } catch (err) {
+    console.error('Fetch legal doc error:', err);
+    res.status(500).json({ error: 'Failed to read legal document file' });
+  }
+});
+
+// List status of all 4 legal docx files
+app.get('/api/legal-status', (req, res) => {
+  const docs = ['privacy-policy', 'terms-of-service', 'cookie-policy', 'disclaimer'];
+  const status = docs.map((docType) => {
+    const filePath = findLegalDocFile(docType);
+    if (filePath) {
+      const stats = fs.statSync(filePath);
+      return {
+        docType,
+        found: true,
+        filename: path.basename(filePath),
+        lastModified: stats.mtime.toISOString(),
+        sizeBytes: stats.size
+      };
+    }
+    return { docType, found: false };
+  });
+  res.json(status);
+});
 
 // Submit Form (Public)
 app.post('/api/submissions', async (req, res) => {
