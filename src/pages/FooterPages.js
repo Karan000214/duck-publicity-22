@@ -171,14 +171,16 @@ export const ContactPage = () => {
       ctaPrimary="Book Free Strategy Call"
       ctaSecondary="WhatsApp Us"
       ctaPrimaryHref="#contact-form"
-      ctaSecondaryHref="https://wa.me/7069940681"
+      ctaSecondaryHref="https://wa.me/917069940681"
     >
       <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr]" id="contact-form">
         <div className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.35)]">
           <h2 className="text-2xl font-bold text-navy">Contact Information</h2>
           <div className="mt-6 space-y-4 text-slate-600">
+            <p><strong>Phone:</strong> <a href="tel:+917069940681" className="text-teal hover:underline">+91 70699 40681</a></p>
             <p><strong>Email:</strong> <a href="mailto:hello@duckpublicity.com" className="text-teal hover:underline">hello@duckpublicity.com</a></p>
-            <p><strong>WhatsApp:</strong> <a href="https://wa.me/7069940681" target="_blank" rel="noreferrer" className="text-teal hover:underline">Start a conversation</a></p>
+            <p><strong>WhatsApp:</strong> <a href="https://wa.me/917069940681" target="_blank" rel="noreferrer" className="text-teal hover:underline">Start a conversation (+91 7069940681)</a></p>
+            <p><strong>Location:</strong> Ahmedabad, Gujarat, India</p>
             <p><strong>Business Hours:</strong> Monday – Saturday, 10 AM – 7 PM</p>
           </div>
           <div className="mt-8 rounded-3xl bg-slate-50 p-6 border border-slate-200">

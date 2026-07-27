@@ -11,10 +11,12 @@ import CTA from './components/CTA';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import ScrollToTop from './components/ScrollToTop';
+import ScrollToTopOnRoute from './components/ScrollToTopOnRoute';
 import { ContentProvider } from './context/ContentContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import { ServiceDetailPage, ServicesIndexPage } from './pages/ServiceDetailPage';
 import {
   AboutPage,
   BlogPage,
@@ -50,9 +52,12 @@ function MainLayout() {
 
   return (
     <div className="min-h-screen bg-white">
+      <ScrollToTopOnRoute />
       {!isAdminRoute && <Navbar />}
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/services" element={<ServicesIndexPage />} />
+        <Route path="/services/:serviceSlug" element={<ServiceDetailPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/process" element={<ProcessPage />} />
         <Route path="/insights" element={<InsightsPage />} />

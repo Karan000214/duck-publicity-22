@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Zap, Target, Search, Smartphone, Palette, Globe } from 'lucide-react';
 import { FiArrowRight } from 'react-icons/fi';
@@ -13,12 +14,23 @@ const iconMap = {
   Globe,
 };
 
+const getSlug = (title) => {
+  if (!title) return 'performance-marketing';
+  return title
+    .toLowerCase()
+    .replace(/\(.*?\)/g, '')
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const Services = () => {
   const { content } = useContent();
   const rawServices = content?.services || [];
 
   const services = rawServices.map((s) => ({
     ...s,
+    slug: s.slug || getSlug(s.title),
     icon: iconMap[s.iconName] || Zap,
     color: s.color || 'from-orange to-red-500',
   }));
@@ -127,14 +139,13 @@ const Services = () => {
                 </div>
 
                 {/* CTA */}
-                <motion.button
-                  onClick={() => scrollToSection('#cta')}
+                <Link
+                  to={`/services/${service.slug}`}
                   className="flex items-center gap-2 text-teal font-semibold group/btn"
-                  whileHover={{ x: 5 }}
                 >
                   Learn More
                   <FiArrowRight className="group-hover/btn:translate-x-1 transition-transform" />
-                </motion.button>
+                </Link>
               </motion.div>
             );
           })}

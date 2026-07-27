@@ -58,7 +58,7 @@ const CTA = () => {
     ].join('\n');
 
     const emailUrl = `mailto:bksales.amazon@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    const whatsappUrl = `https://wa.me/7069940681?text=${encodeURIComponent(`Hi Duck Publicity,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nCompany: ${formData.company}\nService: ${formData.service}\nBudget: ${formData.budget}\n\nI would like to discuss my marketing needs.`)}`;
+    const whatsappUrl = `https://wa.me/917069940681?text=${encodeURIComponent(`Hi Duck Publicity,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nCompany: ${formData.company}\nService: ${formData.service}\nBudget: ${formData.budget}\n\nI would like to discuss my marketing needs.`)}`;
 
     window.location.href = emailUrl;
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');

@@ -16,10 +16,10 @@ const Footer = () => {
 
   const footerLinks = {
     Services: [
-      { label: 'Performance Marketing', href: '#services' },
-      { label: 'Meta Ads', href: '#services' },
-      { label: 'Google Ads', href: '#services' },
-      { label: 'SEO Optimization', href: '#services' },
+      { label: 'Performance Marketing', href: '/services/performance-marketing' },
+      { label: 'Meta Ads', href: '/services/meta-ads' },
+      { label: 'Google Ads', href: '/services/google-ads' },
+      { label: 'SEO Optimization', href: '/services/seo-optimization' },
     ],
     Company: [
       { label: 'About Us', href: '/about' },
@@ -162,13 +162,13 @@ const Footer = () => {
               {
                 icon: Phone,
                 label: 'Phone',
-                value: '+1 (555) 123-4567',
-                href: 'tel:+15551234567',
+                value: '+91 70699 40681',
+                href: 'tel:+917069940681',
               },
               {
                 icon: MapPin,
                 label: 'Location',
-                value: 'New York, USA',
+                value: 'Ahmedabad, Gujarat, India',
                 href: '#',
               },
             ].map((contact, idx) => {
@@ -208,7 +208,7 @@ const Footer = () => {
         >
           <p className="text-gray-300 mb-4">Have a quick question?</p>
           <motion.a
-            href="https://wa.me/15551234567"
+            href="https://wa.me/917069940681"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg font-semibold hover:shadow-lg transition-all"
