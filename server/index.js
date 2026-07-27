@@ -236,16 +236,16 @@ app.get('/api/legal-status', (req, res) => {
 });
 
 // Submit Form (Public)
-app.post('/api/submissions', async (req, res) => {
+app.post(['/api/submissions', '/api/leads'], async (req, res) => {
   try {
     const { name, email, phone, company, service, message } = req.body;
-    if (!name || !email) {
-      return res.status(400).json({ error: 'Name and email are required' });
+    if (!name || !email || !phone || !phone.trim()) {
+      return res.status(400).json({ error: 'Name, email, and phone number are compulsory' });
     }
 
     const result = await runQuery(
       `INSERT INTO form_submissions (name, email, phone, company, service, message, status) VALUES (?, ?, ?, ?, ?, ?, 'New')`,
-      [name, email, phone || '', company || '', service || 'General Inquiry', message || '']
+      [name.trim(), email.trim(), phone.trim(), company || '', service || 'General Inquiry', message || '']
     );
 
     res.status(201).json({

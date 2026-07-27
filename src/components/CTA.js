@@ -25,6 +25,10 @@ const CTA = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.phone || !formData.phone.trim()) {
+      alert('Phone number is compulsory.');
+      return;
+    }
     setLoading(true);
 
     try {

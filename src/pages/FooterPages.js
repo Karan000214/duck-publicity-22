@@ -147,6 +147,10 @@ export const ContactPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.phone || !form.phone.trim()) {
+      alert('Phone number is compulsory.');
+      return;
+    }
     setLoading(true);
     try {
       await fetch('/api/submissions', {
@@ -213,8 +217,8 @@ export const ContactPage = () => {
             </label>
 
             <label className="block text-sm text-slate-600">
-              <span className="mb-2 block font-medium text-slate-800">Phone Number</span>
-              <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-teal focus:bg-white text-slate-900" placeholder="+1 (555) 000-0000" />
+              <span className="mb-2 block font-medium text-slate-800">Phone Number *</span>
+              <input type="tel" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-teal focus:bg-white text-slate-900" placeholder="+91 70699 40681" />
             </label>
 
             <label className="block text-sm text-slate-600 md:col-span-2">
