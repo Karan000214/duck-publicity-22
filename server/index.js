@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { runQuery, getRow, getAllRows } = require('./database');
+const { runQuery, getRow, getAllRows, ensureDbInitialized } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -10,6 +10,22 @@ const JWT_SECRET = process.env.JWT_SECRET || 'DuckPublicitySecretKey2026!';
 
 app.use(cors());
 app.use(express.json());
+
+// Ensure database is initialized before handling requests
+app.use(async (req, res, next) => {
+  try {
+    await ensureDbInitialized();
+    next();
+  } catch (err) {
+    console.error('Database initialization middleware error:', err);
+    res.status(500).json({ error: 'Database initialization failed' });
+  }
+});
+
+// Health check endpoint
+app.get(['/api/health', '/health'], (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // JWT Authentication Middleware
 const authenticateToken = (req, res, next) => {
@@ -32,7 +48,7 @@ const authenticateToken = (req, res, next) => {
 // ==================== AUTHENTICATION ROUTES ====================
 
 // Admin Login
-app.post('/api/auth/login', async (req, res) => {
+app.post(['/api/auth/login', '/auth/login'], async (req, res) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -65,12 +81,12 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // Verify Active User Token
-app.get('/api/auth/me', authenticateToken, (req, res) => {
+app.get(['/api/auth/me', '/auth/me'], authenticateToken, (req, res) => {
   res.json({ user: req.user });
 });
 
 // Change Password
-app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
+app.post(['/api/auth/change-password', '/auth/change-password'], authenticateToken, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
@@ -100,7 +116,7 @@ app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
 // ==================== CONTENT MANAGEMENT ROUTES ====================
 
 // Get All Website Content (Public)
-app.get('/api/content', async (req, res) => {
+app.get(['/api/content', '/content'], async (req, res) => {
   try {
     const rows = await getAllRows(`SELECT * FROM site_content`);
     const content = {};
@@ -119,7 +135,7 @@ app.get('/api/content', async (req, res) => {
 });
 
 // Update Website Content (Protected)
-app.put('/api/content', authenticateToken, async (req, res) => {
+app.put(['/api/content', '/content'], authenticateToken, async (req, res) => {
   try {
     const contentPayload = req.body; // { hero: {...}, services: [...], testimonials: [...] }
     if (!contentPayload || typeof contentPayload !== 'object') {
@@ -191,7 +207,7 @@ function findLegalDocFile(docType) {
 }
 
 // Get single legal doc HTML parsed live from .docx file
-app.get('/api/legal/:docType', async (req, res) => {
+app.get(['/api/legal/:docType', '/legal/:docType'], async (req, res) => {
   try {
     const { docType } = req.params;
     const filePath = findLegalDocFile(docType);
@@ -216,7 +232,7 @@ app.get('/api/legal/:docType', async (req, res) => {
 });
 
 // List status of all 4 legal docx files
-app.get('/api/legal-status', (req, res) => {
+app.get(['/api/legal-status', '/legal-status'], (req, res) => {
   const docs = ['privacy-policy', 'terms-of-service', 'cookie-policy', 'disclaimer'];
   const status = docs.map((docType) => {
     const filePath = findLegalDocFile(docType);
@@ -236,7 +252,7 @@ app.get('/api/legal-status', (req, res) => {
 });
 
 // Submit Form (Public)
-app.post(['/api/submissions', '/api/leads'], async (req, res) => {
+app.post(['/api/submissions', '/api/leads', '/submissions', '/leads'], async (req, res) => {
   try {
     const { name, email, phone, company, service, message } = req.body;
     if (!name || !email || !phone || !phone.trim()) {
@@ -259,7 +275,7 @@ app.post(['/api/submissions', '/api/leads'], async (req, res) => {
 });
 
 // Get All Submissions (Protected)
-app.get('/api/submissions', authenticateToken, async (req, res) => {
+app.get(['/api/submissions', '/submissions'], authenticateToken, async (req, res) => {
   try {
     const submissions = await getAllRows(`SELECT * FROM form_submissions ORDER BY created_at DESC`);
     res.json(submissions);
@@ -270,7 +286,7 @@ app.get('/api/submissions', authenticateToken, async (req, res) => {
 });
 
 // Update Submission Status (Protected)
-app.patch('/api/submissions/:id', authenticateToken, async (req, res) => {
+app.patch(['/api/submissions/:id', '/submissions/:id'], authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -288,7 +304,7 @@ app.patch('/api/submissions/:id', authenticateToken, async (req, res) => {
 });
 
 // Delete Submission (Protected)
-app.delete('/api/submissions/:id', authenticateToken, async (req, res) => {
+app.delete(['/api/submissions/:id', '/submissions/:id'], authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     await runQuery(`DELETE FROM form_submissions WHERE id = ?`, [id]);
@@ -302,7 +318,7 @@ app.delete('/api/submissions/:id', authenticateToken, async (req, res) => {
 // ==================== ANALYTICS & TRACKING ROUTES ====================
 
 // Track Page View & Cookie Visitor Data (Public)
-app.post('/api/analytics/track', async (req, res) => {
+app.post(['/api/analytics/track', '/analytics/track'], async (req, res) => {
   try {
     const { path, referrer, visitorId, visitCount, isReturning, utmSource, utmMedium, utmCampaign } = req.body;
     const userAgent = req.headers['user-agent'] || '';
@@ -330,7 +346,7 @@ app.post('/api/analytics/track', async (req, res) => {
 });
 
 // Get Analytics Summary Reports (Protected)
-app.get('/api/analytics/summary', authenticateToken, async (req, res) => {
+app.get(['/api/analytics/summary', '/analytics/summary'], authenticateToken, async (req, res) => {
   try {
     // 1. Lead Counts
     const totalRow = await getRow(`SELECT COUNT(*) as count FROM form_submissions`);
@@ -397,7 +413,7 @@ app.get('/api/analytics/summary', authenticateToken, async (req, res) => {
 });
 
 // Download Submissions Report as CSV (Protected)
-app.get('/api/analytics/export-csv', authenticateToken, async (req, res) => {
+app.get(['/api/analytics/export-csv', '/analytics/export-csv'], authenticateToken, async (req, res) => {
   try {
     const submissions = await getAllRows(`SELECT * FROM form_submissions ORDER BY created_at DESC`);
 
